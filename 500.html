@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Erro interno{% endblock %}
+{% block body %}
+<div style="min-height:calc(100vh - 64px - 80px);display:flex;align-items:center;justify-content:center;padding:40px 24px;text-align:center">
+  <div style="max-width:420px">
+    <div style="font-size:5rem;font-weight:800;color:var(--gray200);letter-spacing:-.05em;line-height:1;margin-bottom:16px">500</div>
+    <h2 style="font-size:1.4rem;font-weight:700;color:var(--gray900);margin-bottom:10px">Erro interno do servidor</h2>
+    <p style="color:var(--gray600);line-height:1.7;margin-bottom:24px">Algo deu errado do nosso lado. Nossa equipe foi notificada. Por favor, tente novamente em instantes.</p>
+    <div style="display:flex;gap:12px;justify-content:center">
+      <a href="{{ url_for('index') }}" class="btn btn-primary">Voltar ao início</a>
+      <a href="mailto:contato@convertfin.com.br" class="btn btn-outline">Contatar suporte</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Assinar Pro{% endblock %}
+{% block head %}
+<style>
+  body{background:var(--gray50)}
+  .assinar-wrap{max-width:560px;margin:60px auto;padding:0 24px 80px}
+  .assinar-header{text-align:center;margin-bottom:36px}
+  .assinar-header h1{font-size:1.8rem;font-weight:700;color:var(--gray900);margin-bottom:8px}
+  .assinar-header p{color:var(--gray600);font-size:.95rem}
+  .order-summary{background:#fff;border:1px solid var(--gray200);border-radius:10px;padding:24px;margin-bottom:24px}
+  .order-row{display:flex;justify-content:space-between;font-size:.875rem;padding:8px 0;border-bottom:1px solid var(--gray100)}
+  .order-row:last-child{border:none;font-weight:700;color:var(--gray900);font-size:1rem;padding-top:14px}
+  .stripe-btn{display:block;width:100%;padding:16px;background:var(--blue-l);color:#fff;font-size:1rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;text-align:center;text-decoration:none;transition:.15s;font-family:'Inter',sans-serif}
+  .stripe-btn:hover{background:var(--blue);color:#fff;text-decoration:none}
+  .guarantee{display:flex;align-items:flex-start;gap:12px;padding:18px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;margin-top:18px}
+  .guarantee-icon{color:var(--green);font-weight:700;font-size:1.1rem;flex-shrink:0;margin-top:1px}
+  .guarantee-text{font-size:.83rem;color:var(--gray700);line-height:1.65}
+  .stripe-logo{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;font-size:.78rem;color:var(--gray400)}
+  .stripe-logo svg{opacity:.5}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="assinar-wrap">
+  <div class="assinar-header">
+    <h1>Assinar ConvertFin Pro</h1>
+    <p>Conversões ilimitadas por R$ {{ pro_price }}/mês. Cancele quando quiser.</p>
+  </div>
+
+  <div class="order-summary">
+    <div style="font-size:.9rem;font-weight:700;color:var(--gray900);margin-bottom:14px">Resumo do pedido</div>
+    <div class="order-row"><span>ConvertFin Pro</span><span>R$ {{ pro_price }}/mês</span></div>
+    <div class="order-row"><span>Conversões</span><span>Ilimitadas</span></div>
+    <div class="order-row"><span>Suporte</span><span>Prioritário via WhatsApp</span></div>
+    <div class="order-row"><span>Categorização por IA</span><span>Em breve</span></div>
+    <div class="order-row"><span>Total mensal</span><span style="color:var(--blue)">R$ {{ pro_price }}</span></div>
+  </div>
+
+  <a href="https://buy.stripe.com/test_5kQ14n9IeaxRfJq18SfYY00" class="stripe-btn" target="_blank">
+    Pagar com Stripe — R$ {{ pro_price }}/mês
+  </a>
+
+  <div class="stripe-logo">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect width="14" height="14" rx="2" fill="#635BFF"/><path d="M6.5 4.5C6.5 3.95 6.95 3.5 7.5 3.5C8.05 3.5 8.5 3.95 8.5 4.5C8.5 5.05 8.05 5.5 7.5 5.5C6.95 5.5 6.5 5.05 6.5 4.5Z" fill="white"/></svg>
+    Pagamento processado com segurança pelo Stripe
+  </div>
+
+  <div class="guarantee" style="margin-top:20px">
+    <div class="guarantee-icon">✓</div>
+    <div class="guarantee-text">
+      <strong>Pagamento 100% seguro.</strong> Seus dados de cartão são processados diretamente pelo Stripe — não armazenamos nenhuma informação financeira. A assinatura é mensal e pode ser cancelada a qualquer momento sem multa.
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:20px;font-size:.82rem;color:var(--gray400)">
+    Dúvidas? <a href="mailto:contato@convertfin.com.br">contato@convertfin.com.br</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% block title %}Painel Admin{% endblock %}
+
+{% block head %}
+<style>
+  body{background:var(--gray100)}
+  .admin-header{background:var(--navy);padding:28px 0;color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+  .admin-header h2{font-size:1.3rem;font-weight:700}
+  .admin-header p{font-size:.8rem;color:rgba(255,255,255,.5);margin-top:2px}
+  .admin-body{padding:32px 0 80px}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px}
+  .stat-card{background:#fff;border:1px solid var(--gray200);border-radius:var(--r);padding:22px}
+  .stat-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray400);margin-bottom:8px}
+  .stat-value{font-size:2rem;font-weight:800;color:var(--gray900);letter-spacing:-.03em}
+  .stat-sub{font-size:.75rem;color:var(--gray500);margin-top:4px}
+
+  .admin-section{background:#fff;border:1px solid var(--gray200);border-radius:var(--r);margin-bottom:24px;overflow:hidden}
+  .admin-section-header{padding:18px 24px;border-bottom:1px solid var(--gray100);display:flex;align-items:center;justify-content:space-between}
+  .admin-section-title{font-size:.95rem;font-weight:700;color:var(--gray900)}
+  .admin-section-body{padding:24px}
+
+  /* SETTINGS */
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:16px;background:var(--gray50);border-radius:8px;border:1px solid var(--gray200)}
+  .toggle-label{font-size:.875rem;font-weight:600;color:var(--gray900)}
+  .toggle-sub{font-size:.78rem;color:var(--gray500);margin-top:2px}
+  .switch{position:relative;display:inline-block;width:44px;height:24px}
+  .switch input{opacity:0;width:0;height:0}
+  .slider{position:absolute;cursor:pointer;inset:0;background:var(--gray200);border-radius:999px;transition:.3s}
+  .slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+  input:checked+.slider{background:var(--green)}
+  input:checked+.slider:before{transform:translateX(20px)}
+
+  /* USER TABLE */
+  .action-form{display:inline}
+  .user-actions{display:flex;gap:6px;flex-wrap:wrap}
+  .mini-form{display:flex;align-items:center;gap:6px}
+  .mini-input{padding:4px 8px;border:1px solid var(--gray200);border-radius:4px;font-size:.75rem;width:60px}
+
+  .tab-btns{display:flex;gap:4px;border-bottom:1px solid var(--gray200);padding:0 24px;background:#fff}
+  .tab-btn{padding:12px 16px;font-size:.82rem;font-weight:600;color:var(--gray600);cursor:pointer;border-bottom:2px solid transparent;transition:.15s;background:none;border-top:none;border-left:none;border-right:none}
+  .tab-btn:hover{color:var(--gray900)}
+  .tab-btn.active{color:var(--blue-l);border-bottom-color:var(--blue-l)}
+  .tab-content{display:none}
+  .tab-content.active{display:block}
+
+  @media(max-width:900px){.stats-grid{grid-template-columns:1fr 1fr}.settings-grid{grid-template-columns:1fr}}
+  @media(max-width:580px){.stats-grid{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="admin-header">
+  <div class="container">
+    <h2>Painel Administrativo</h2>
+    <p>ConvertFin — Controle total da plataforma</p>
+  </div>
+</div>
+
+<div class="admin-body">
+  <div class="container">
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total de usuários</div>
+        <div class="stat-value">{{ users|length }}</div>
+        <div class="stat-sub">cadastrados na plataforma</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Assinantes Pro</div>
+        <div class="stat-value" style="color:var(--blue)">{{ pro_users }}</div>
+        <div class="stat-sub">plano pago ativo</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Usuários gratuitos</div>
+        <div class="stat-value">{{ free_users }}</div>
+        <div class="stat-sub">plano free</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total de conversões</div>
+        <div class="stat-value">{{ total_conversions }}</div>
+        <div class="stat-sub">desde o início</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="admin-section">
+      <div class="tab-btns">
+        <button class="tab-btn active" onclick="showTab(this,'tab-users')">Usuários ({{ users|length }})</button>
+        <button class="tab-btn" onclick="showTab(this,'tab-recent')">Conversões recentes</button>
+        <button class="tab-btn" onclick="showTab(this,'tab-settings')">Configurações</button>
+      </div>
+
+      <!-- USERS TAB -->
+      <div class="tab-content active" id="tab-users">
+        <div class="table-wrap" style="border:none;border-radius:0">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th><th>Nome</th><th>E-mail</th><th>Plano</th>
+                <th>Uso/mês</th><th>Créditos extra</th><th>Admin</th><th>Cadastro</th><th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in users %}
+              <tr>
+                <td class="text-muted text-sm">{{ u.id }}</td>
+                <td><strong>{{ u.name }}</strong></td>
+                <td class="text-sm">{{ u.email }}</td>
+                <td>
+                  <span class="badge {% if u.plan=='pro' %}badge-blue{% else %}badge-gray{% endif %}">
+                    {{ u.plan.upper() }}
+                  </span>
+                </td>
+                <td>{{ u.monthly_used }}</td>
+                <td>{{ u.extra_credits }}</td>
+                <td>{% if u.is_admin %}<span class="badge badge-amber">Sim</span>{% else %}—{% endif %}</td>
+                <td class="text-sm text-muted">{{ u.created_at[:10] }}</td>
+                <td>
+                  <div class="user-actions">
+                    {% if u.plan == 'free' %}
+                    <form class="action-form" method="POST" action="{{ url_for('admin_user_action', uid=u.id) }}">
+                      <input type="hidden" name="action" value="set_pro"/>
+                      <button type="submit" class="btn btn-success btn-sm">Pro</button>
+                    </form>
+                    {% else %}
+                    <form class="action-form" method="POST" action="{{ url_for('admin_user_action', uid=u.id) }}">
+                      <input type="hidden" name="action" value="set_free"/>
+                      <button type="submit" class="btn btn-outline btn-sm">Free</button>
+                    </form>
+                    {% endif %}
+
+                    <form class="action-form mini-form" method="POST" action="{{ url_for('admin_user_action', uid=u.id) }}">
+                      <input type="hidden" name="action" value="add_credits"/>
+                      <input type="number" name="credits" class="mini-input" value="5" min="1" max="999"/>
+                      <button type="submit" class="btn btn-primary btn-sm">+Créditos</button>
+                    </form>
+
+                    <form class="action-form" method="POST" action="{{ url_for('admin_user_action', uid=u.id) }}">
+                      <input type="hidden" name="action" value="reset_usage"/>
+                      <button type="submit" class="btn btn-outline btn-sm">Reset uso</button>
+                    </form>
+
+                    {% if not u.is_admin %}
+                    <form class="action-form" method="POST" action="{{ url_for('admin_user_action', uid=u.id) }}" onsubmit="return confirm('Excluir usuário {{ u.name }}?')">
+                      <input type="hidden" name="action" value="delete"/>
+                      <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
+                    </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RECENT CONVERSIONS TAB -->
+      <div class="tab-content" id="tab-recent">
+        <div class="table-wrap" style="border:none;border-radius:0">
+          <table>
+            <thead><tr><th>Usuário</th><th>E-mail</th><th>Arquivo</th><th>Banco</th><th>Formato</th><th>Linhas</th><th>Data</th></tr></thead>
+            <tbody>
+              {% for r in recent %}
+              <tr>
+                <td><strong>{{ r.name }}</strong></td>
+                <td class="text-sm">{{ r.email }}</td>
+                <td class="text-sm" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.filename or '—' }}</td>
+                <td><span class="badge badge-blue">{{ r.bank or '—' }}</span></td>
+                <td><span class="badge badge-gray">{{ r.format }}</span></td>
+                <td>{{ r.rows }}</td>
+                <td class="text-sm text-muted">{{ r.created_at[:16] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SETTINGS TAB -->
+      <div class="tab-content" id="tab-settings">
+        <div style="padding:24px">
+          <form method="POST" action="{{ url_for('admin_settings') }}">
+            <div class="settings-grid">
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Categorização com IA</div>
+                  <div class="toggle-sub">Ativa o recurso de IA no painel dos usuários Pro. Requer configuração da API na variável de ambiente ANTHROPIC_API_KEY.</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="ai_enabled" {% if ai_enabled %}checked{% endif %}/>
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <div>
+                  <div class="toggle-label">Modo de manutenção</div>
+                  <div class="toggle-sub">Bloqueia o acesso de usuários comuns à plataforma. Admins continuam com acesso normal.</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" name="maintenance" {% if maintenance %}checked{% endif %}/>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <div style="margin-top:20px">
+              <button type="submit" class="btn btn-primary">Salvar configurações</button>
+            </div>
+          </form>
+
+          <hr style="margin:32px 0;border-color:var(--gray200)"/>
+
+          <div class="card-title">Integração de Pagamento</div>
+          <p class="text-sm text-muted" style="margin-bottom:16px;line-height:1.7">
+            Para ativar a cobrança automática, configure as variáveis de ambiente abaixo e atualize os links na página <code>templates/assinar.html</code>:
+          </p>
+          <div style="background:var(--gray900);color:#a5f3fc;font-family:'JetBrains Mono',monospace;font-size:.8rem;padding:16px;border-radius:8px;line-height:1.8">
+            WEBHOOK_TOKEN=sua-chave-secreta-aqui<br/>
+            SECRET_KEY=sua-chave-flask-aqui<br/>
+            <span style="color:#6b7280"># Para ativar a IA:</span><br/>
+            ANTHROPIC_API_KEY=sua-chave-anthropic-aqui
+          </div>
+
+          <div style="margin-top:20px">
+            <div class="card-title">Webhook de pagamento</div>
+            <p class="text-sm text-muted" style="margin-bottom:8px">Configure este endpoint no Stripe ou Hotmart para ativar planos automaticamente após pagamento:</p>
+            <div style="background:var(--gray50);border:1px solid var(--gray200);border-radius:6px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:.8rem">
+              POST https://seu-dominio.com/webhook/pagamento<br/>
+              Body JSON: {"email": "usuario@email.com", "token": "SEU_WEBHOOK_TOKEN"}
+            </div>
+          </div>
+
+          <div style="margin-top:24px">
+            <div class="card-title">IA — Configuração futura</div>
+            <p class="text-sm text-muted" style="line-height:1.7">
+              O recurso de categorização por IA está preparado na estrutura do sistema. Quando ativado, utilizará a API da Anthropic (Claude) para classificar cada transação por categoria. Para ativar:<br/>
+              1. Configure a variável de ambiente <code>ANTHROPIC_API_KEY</code><br/>
+              2. Ative o toggle "Categorização com IA" acima<br/>
+              3. O recurso será liberado automaticamente para usuários Pro
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function showTab(btn, tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+  }
+</script>
+{% endblock %}

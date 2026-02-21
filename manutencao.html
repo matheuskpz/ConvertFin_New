@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Manutenção{% endblock %}
+{% block body %}
+<div style="min-height:calc(100vh - 64px - 80px);display:flex;align-items:center;justify-content:center;padding:40px 24px;text-align:center">
+  <div style="max-width:440px">
+    <div style="width:64px;height:64px;background:var(--amber);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 24px">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <h2 style="font-size:1.5rem;font-weight:700;color:var(--gray900);margin-bottom:12px">Sistema em manutenção</h2>
+    <p style="color:var(--gray600);line-height:1.7;margin-bottom:28px">Estamos realizando melhorias no sistema. Voltaremos em breve. Pedimos desculpas pelo inconveniente.</p>
+    <p class="text-sm text-muted">Dúvidas? <a href="mailto:contato@convertfin.com.br">contato@convertfin.com.br</a></p>
+  </div>
+</div>
+{% endblock %}

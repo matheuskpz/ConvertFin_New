@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Entrar{% endblock %}
+{% block head %}
+<style>
+  body{background:var(--gray50)}
+  .auth-wrap{min-height:calc(100vh - 64px - 80px);display:flex;align-items:center;justify-content:center;padding:40px 24px}
+  .auth-card{background:#fff;border:1px solid var(--gray200);border-radius:12px;padding:40px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+  .auth-title{font-size:1.4rem;font-weight:700;color:var(--gray900);margin-bottom:6px}
+  .auth-sub{font-size:.875rem;color:var(--gray600);margin-bottom:32px}
+  .auth-footer{text-align:center;margin-top:24px;font-size:.875rem;color:var(--gray600)}
+</style>
+{% endblock %}
+{% block body %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px">
+        <div class="nav-brand-dot" style="width:8px;height:8px;background:var(--blue-l);border-radius:50%"></div>
+        <span style="font-weight:700;color:var(--gray900)">{{ app_name }}</span>
+      </div>
+      <div class="auth-title">Acesse sua conta</div>
+      <div class="auth-sub">Bem-vindo(a) de volta. Informe seus dados de acesso.</div>
+    </div>
+    <form method="POST">
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input type="email" name="email" class="form-control" placeholder="seu@email.com.br" required autofocus/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••" required/>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" style="margin-top:8px">Entrar na conta</button>
+    </form>
+    <div class="auth-footer">
+      Não tem conta? <a href="{{ url_for('register') }}">Criar conta gratuita</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

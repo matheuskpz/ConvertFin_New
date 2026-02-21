@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+{% block title %}Painel{% endblock %}
+
+{% block head %}
+<style>
+  .dash-header{background:var(--navy);padding:32px 0;color:#fff}
+  .dash-header h2{font-size:1.4rem;font-weight:700;margin-bottom:4px}
+  .dash-header p{color:rgba(255,255,255,.6);font-size:.875rem}
+  .plan-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .plan-chip.free{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
+  .plan-chip.pro{background:#1d4ed8;color:#fff}
+
+  .usage-bar-wrap{margin-top:12px;max-width:320px}
+  .usage-bar-track{height:6px;background:rgba(255,255,255,.15);border-radius:999px;margin-top:6px;overflow:hidden}
+  .usage-bar-fill{height:100%;background:var(--blue-l);border-radius:999px;transition:width .5s ease}
+  .usage-bar-fill.warn{background:#f59e0b}
+  .usage-bar-fill.full{background:#ef4444}
+
+  .dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:24px;margin-top:32px}
+
+  /* CONVERTER CARD */
+  .converter-card{background:#fff;border:1px solid var(--gray200);border-radius:var(--r);overflow:hidden}
+  .converter-header{padding:24px 28px 0;border-bottom:1px solid var(--gray100);padding-bottom:20px}
+  .converter-body{padding:28px}
+  .drop-zone{border:2px dashed var(--gray200);border-radius:8px;padding:48px 24px;text-align:center;cursor:pointer;transition:.2s;position:relative;background:var(--gray50)}
+  .drop-zone:hover,.drop-zone.drag-over{border-color:var(--blue-l);background:var(--sky)}
+  .drop-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+  .drop-icon{width:48px;height:48px;background:var(--gray100);border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px}
+  .drop-icon svg{width:24px;height:24px;stroke:var(--gray400);fill:none;stroke-width:1.5}
+  .drop-title{font-weight:600;color:var(--gray700);margin-bottom:4px}
+  .drop-sub{font-size:.8rem;color:var(--gray400)}
+
+  .file-pill{display:none;align-items:center;gap:10px;padding:12px 16px;background:var(--sky);border:1px solid #bfdbfe;border-radius:8px;margin-top:12px}
+  .file-pill.show{display:flex}
+  .file-pill-name{flex:1;font-size:.85rem;font-weight:500;color:var(--blue);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .file-pill-rm{cursor:pointer;color:var(--gray400);font-size:1.1rem;line-height:1;transition:.15s}
+  .file-pill-rm:hover{color:var(--red)}
+
+  .format-tabs{display:flex;gap:8px;margin:20px 0 0}
+  .format-tab{flex:1;padding:10px;text-align:center;border-radius:7px;border:1.5px solid var(--gray200);font-size:.82rem;font-weight:600;cursor:pointer;transition:.15s;color:var(--gray600);background:#fff}
+  .format-tab:hover{border-color:var(--blue-l);color:var(--blue-l)}
+  .format-tab.selected{border-color:var(--blue-l);background:var(--sky);color:var(--blue)}
+  .format-tab-desc{font-size:.7rem;font-weight:400;display:block;margin-top:2px;color:inherit;opacity:.7}
+
+  .btn-convert{width:100%;margin-top:20px;padding:14px;background:var(--blue-l);color:#fff;border:none;border-radius:7px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:.15s}
+  .btn-convert:hover{background:var(--blue)}
+  .btn-convert:disabled{opacity:.5;cursor:not-allowed}
+
+  .convert-status{margin-top:14px;padding:12px 16px;border-radius:7px;font-size:.85rem;font-weight:500;display:none}
+  .convert-status.success{display:block;background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d}
+  .convert-status.error{display:block;background:#fef2f2;border:1px solid #fecaca;color:#dc2626}
+
+  /* SIDE CARDS */
+  .side-stack{display:flex;flex-direction:column;gap:20px}
+  .info-card{background:#fff;border:1px solid var(--gray200);border-radius:var(--r);padding:22px}
+  .info-card-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--gray400);margin-bottom:12px}
+  .usage-stat{font-size:2rem;font-weight:700;color:var(--gray900);line-height:1}
+  .usage-stat-sub{font-size:.8rem;color:var(--gray500);margin-top:4px}
+  .upgrade-banner{background:linear-gradient(135deg,var(--navy),var(--navy2));border-radius:var(--r);padding:22px;color:#fff}
+  .upgrade-banner h4{font-size:.95rem;font-weight:700;margin-bottom:6px}
+  .upgrade-banner p{font-size:.8rem;color:rgba(255,255,255,.7);margin-bottom:16px;line-height:1.6}
+  .upgrade-features{list-style:none;display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
+  .upgrade-features li{font-size:.8rem;color:rgba(255,255,255,.8);display:flex;align-items:center;gap:7px}
+  .upgrade-features li::before{content:'✓';color:#4ade80;font-weight:700;font-size:.72rem}
+
+  /* HISTORY */
+  .history-card{background:#fff;border:1px solid var(--gray200);border-radius:var(--r);margin-top:24px;overflow:hidden}
+  .history-header{padding:18px 24px;border-bottom:1px solid var(--gray100);display:flex;align-items:center;justify-content:space-between}
+  .history-title{font-size:.9rem;font-weight:700;color:var(--gray900)}
+  .empty-state{padding:40px;text-align:center;color:var(--gray400);font-size:.875rem}
+
+  /* AI BANNER */
+  .ai-banner{background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:#fff;border-radius:var(--r);padding:22px;margin-top:20px;position:relative;overflow:hidden}
+  .ai-banner::before{content:'IA';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:5rem;font-weight:900;opacity:.06;letter-spacing:-.05em}
+  .ai-banner h4{font-size:.95rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .ai-badge{background:rgba(255,255,255,.15);border-radius:999px;padding:2px 10px;font-size:.65rem;font-weight:700;letter-spacing:.06em}
+  .ai-banner p{font-size:.8rem;color:rgba(255,255,255,.65);line-height:1.6}
+
+  @media(max-width:900px){.dash-grid{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="dash-header">
+  <div class="container">
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <div>
+        <h2>Olá, {{ user.name.split()[0] }}</h2>
+        <p>
+          <span class="plan-chip {{ user.plan }}">Plano {{ 'Pro' if user.plan == 'pro' else 'Gratuito' }}</span>
+          &nbsp;
+          {% if user.plan == 'free' %}
+            {{ user.monthly_used }} de {{ free_limit + user.extra_credits }} conversões utilizadas este mês
+          {% else %}
+            Conversões ilimitadas
+          {% endif %}
+        </p>
+        {% if user.plan == 'free' %}
+        <div class="usage-bar-wrap">
+          <div class="usage-bar-track">
+            {% set pct = (user.monthly_used / (free_limit + user.extra_credits) * 100)|int %}
+            <div class="usage-bar-fill {% if pct >= 100 %}full{% elif pct >= 60 %}warn{% endif %}" style="width:{{ [pct,100]|min }}%"></div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      {% if user.plan == 'free' %}
+      <a href="{{ url_for('planos') }}" class="btn btn-primary">Fazer upgrade — R$ {{ pro_price }}/mês</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="container page" style="padding-top:0">
+  <div class="dash-grid">
+
+    <!-- CONVERTER -->
+    <div>
+      <div class="converter-card">
+        <div class="converter-header">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="card-title" style="margin:0">Converter extrato</div>
+              <div class="text-sm text-muted mt-1">Faça o upload do PDF e escolha o formato de saída</div>
+            </div>
+          </div>
+        </div>
+        <div class="converter-body">
+          <div class="drop-zone" id="drop-zone">
+            <input type="file" id="file-input" accept=".pdf"/>
+            <div class="drop-icon">
+              <svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+            </div>
+            <div class="drop-title">Arraste o PDF aqui ou clique para selecionar</div>
+            <div class="drop-sub">PDF pesquisável · Até 15 MB · Todos os bancos principais</div>
+          </div>
+
+          <div class="file-pill" id="file-pill">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+            <span class="file-pill-name" id="file-pill-name"></span>
+            <span class="file-pill-rm" onclick="removeFile()">×</span>
+          </div>
+
+          <!-- FORMAT SELECTOR -->
+          <div>
+            <div class="form-label" style="margin-top:20px;margin-bottom:8px">Formato de saída</div>
+            <div class="format-tabs">
+              <div class="format-tab selected" data-fmt="ofx" onclick="selectFmt(this,'ofx')">
+                OFX <span class="format-tab-desc">Contábil / ERP</span>
+              </div>
+              <div class="format-tab" data-fmt="excel" onclick="selectFmt(this,'excel')">
+                Excel <span class="format-tab-desc">.xlsx</span>
+              </div>
+              <div class="format-tab" data-fmt="csv" onclick="selectFmt(this,'csv')">
+                CSV <span class="format-tab-desc">Planilha</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-convert" id="btn-convert" onclick="doConvert()" disabled>
+            <div class="spinner" id="spinner"></div>
+            <span id="btn-text">Selecione um arquivo</span>
+          </button>
+
+          <div class="convert-status" id="convert-status"></div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="history-card">
+        <div class="history-header">
+          <div class="history-title">Histórico de conversões</div>
+          <span class="badge badge-gray">Este mês</span>
+        </div>
+        {% if history %}
+        <div class="table-wrap" style="border:none;border-radius:0">
+          <table>
+            <thead><tr><th>Arquivo</th><th>Banco</th><th>Formato</th><th>Linhas</th><th>Data</th></tr></thead>
+            <tbody>
+              {% for h in history %}
+              <tr>
+                <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ h.filename or '—' }}</td>
+                <td><span class="badge badge-blue">{{ h.bank or '—' }}</span></td>
+                <td><span class="badge badge-gray">{{ h.format }}</span></td>
+                <td>{{ h.rows }}</td>
+                <td class="text-muted text-sm">{{ h.created_at[:16] }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">Nenhuma conversão realizada ainda. Faça o upload do primeiro arquivo acima.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="side-stack">
+      {% if user.plan == 'free' %}
+      <div class="info-card">
+        <div class="info-card-title">Uso mensal</div>
+        <div class="usage-stat">{{ user.monthly_used }}<span style="font-size:1rem;color:var(--gray400)"> / {{ free_limit + user.extra_credits }}</span></div>
+        <div class="usage-stat-sub">conversões utilizadas em {{ now.strftime('%B de %Y') }}</div>
+        {% if user.extra_credits > 0 %}
+        <div class="mt-2 text-sm" style="color:var(--green)">+ {{ user.extra_credits }} crédito(s) extra(s) adicionado(s)</div>
+        {% endif %}
+      </div>
+      <div class="upgrade-banner">
+        <h4>Upgrade para Pro</h4>
+        <p>Remova os limites e converta quantos extratos precisar.</p>
+        <ul class="upgrade-features">
+          <li>Conversões ilimitadas</li>
+          <li>OFX, Excel e CSV</li>
+          <li>Suporte prioritário</li>
+          <li>Novos bancos em primeira mão</li>
+        </ul>
+        <a href="{{ url_for('planos') }}" class="btn btn-primary btn-block" style="justify-content:center">Ver plano Pro — R$ {{ pro_price }}/mês</a>
+      </div>
+      {% else %}
+      <div class="info-card">
+        <div class="info-card-title">Seu plano</div>
+        <div class="usage-stat" style="color:var(--blue)">Pro</div>
+        <div class="usage-stat-sub">Conversões ilimitadas ativas</div>
+        <div class="mt-3 text-sm text-muted">{{ user.monthly_used }} conversões realizadas este mês</div>
+      </div>
+      {% endif %}
+
+      {% if ai_enabled %}
+      <div class="ai-banner">
+        <h4>Inteligência Artificial <span class="ai-badge">NOVO</span></h4>
+        <p>Categorização automática das transações com IA. Identifica despesas, receitas e padrões automaticamente.</p>
+        <a href="#" class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.3);margin-top:4px">Experimentar</a>
+      </div>
+      {% else %}
+      <div class="ai-banner">
+        <h4>Categorização com IA <span class="ai-badge">EM BREVE</span></h4>
+        <p>Em breve: categorização automática de transações com inteligência artificial para assinantes Pro.</p>
+      </div>
+      {% endif %}
+
+      <div class="info-card">
+        <div class="info-card-title">Bancos suportados</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          {% for b in ["Nubank","Itaú","Bradesco","Santander","Inter","Caixa","BB","BTG","C6","Sicoob","Sicredi","PicPay","PagBank","Stone","Mercado Pago"] %}
+          <span class="badge badge-gray">{{ b }}</span>
+          {% endfor %}
+          <span class="badge badge-gray">+30 outros</span>
+        </div>
+        <div class="mt-2 text-sm text-muted">Não encontrou seu banco? <a href="#">Fale com o suporte</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPGRADE POPUP -->
+<div class="overlay" id="upgrade-overlay">
+  <div class="popup">
+    <div style="font-size:2rem;margin-bottom:16px">🔒</div>
+    <div class="popup-title">Limite de conversões atingido</div>
+    <div class="popup-sub">
+      Você atingiu o limite de <strong>{{ free_limit }}</strong> conversões gratuitas deste mês.
+      Faça upgrade para o plano Pro e converta sem limites por apenas <strong>R$ {{ pro_price }}/mês</strong>.
+    </div>
+    <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
+      <li style="font-size:.875rem;display:flex;align-items:center;gap:8px"><span style="color:var(--green);font-weight:700">✓</span> Conversões ilimitadas todos os meses</li>
+      <li style="font-size:.875rem;display:flex;align-items:center;gap:8px"><span style="color:var(--green);font-weight:700">✓</span> OFX, Excel e CSV</li>
+      <li style="font-size:.875rem;display:flex;align-items:center;gap:8px"><span style="color:var(--green);font-weight:700">✓</span> Suporte prioritário por WhatsApp</li>
+      <li style="font-size:.875rem;display:flex;align-items:center;gap:8px"><span style="color:var(--green);font-weight:700">✓</span> Acesso a novos recursos antes de todos</li>
+    </ul>
+    <div style="display:flex;gap:12px">
+      <a href="{{ url_for('planos') }}" class="btn btn-primary" style="flex:1;justify-content:center">Assinar Pro — R$ {{ pro_price }}/mês</a>
+      <button onclick="document.getElementById('upgrade-overlay').classList.remove('show')" class="btn btn-outline">Agora não</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let selectedFile = null;
+  let selectedFmt  = 'ofx';
+
+  // Format tab
+  function selectFmt(el, fmt) {
+    document.querySelectorAll('.format-tab').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedFmt = fmt;
+  }
+
+  // Drop zone
+  const dz = document.getElementById('drop-zone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('drag-over');
+    const f = e.dataTransfer.files[0];
+    if (f && f.name.toLowerCase().endsWith('.pdf')) setFile(f);
+    else showStatus('Apenas arquivos .pdf são aceitos.', 'error');
+  });
+  document.getElementById('file-input').addEventListener('change', e => {
+    if (e.target.files[0]) setFile(e.target.files[0]);
+  });
+
+  function setFile(f) {
+    selectedFile = f;
+    document.getElementById('file-pill').classList.add('show');
+    document.getElementById('file-pill-name').textContent = f.name;
+    document.getElementById('btn-convert').disabled = false;
+    document.getElementById('btn-text').textContent = 'Converter e baixar';
+    hideStatus();
+  }
+
+  function removeFile() {
+    selectedFile = null;
+    document.getElementById('file-pill').classList.remove('show');
+    document.getElementById('file-input').value = '';
+    document.getElementById('btn-convert').disabled = true;
+    document.getElementById('btn-text').textContent = 'Selecione um arquivo';
+    hideStatus();
+  }
+
+  async function doConvert() {
+    if (!selectedFile) return;
+    const btn = document.getElementById('btn-convert');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btn-text');
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    btnText.textContent = 'Processando...';
+    hideStatus();
+
+    const fd = new FormData();
+    fd.append('file', selectedFile);
+    fd.append('format', selectedFmt);
+
+    try {
+      const res = await fetch('/api/convert', { method: 'POST', body: fd });
+
+      if (res.status === 403) {
+        document.getElementById('upgrade-overlay').classList.add('show');
+        return;
+      }
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({ error: 'Erro desconhecido.' }));
+        showStatus(d.error || 'Erro ao converter.', 'error');
+        return;
+      }
+
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      const cd   = res.headers.get('Content-Disposition') || '';
+      const m    = cd.match(/filename="?([^"]+)"?/);
+      a.download = m ? m[1] : 'extrato.' + selectedFmt;
+      a.click();
+      URL.revokeObjectURL(url);
+      showStatus('Arquivo gerado e baixado com sucesso!', 'success');
+      // Reload para atualizar histórico
+      setTimeout(() => location.reload(), 1500);
+    } catch (e) {
+      showStatus('Erro de conexão. Tente novamente.', 'error');
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      btnText.textContent = 'Converter e baixar';
+    }
+  }
+
+  function showStatus(msg, type) {
+    const el = document.getElementById('convert-status');
+    el.textContent = msg;
+    el.className = 'convert-status ' + type;
+  }
+  function hideStatus() {
+    document.getElementById('convert-status').className = 'convert-status';
+  }
+
+  // Fecha popup ao clicar fora
+  document.getElementById('upgrade-overlay').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('show');
+  });
+</script>
+{% endblock %}

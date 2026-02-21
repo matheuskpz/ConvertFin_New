@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>{% block title %}{{ app_name }}{% endblock %} — Conversor de Extratos Bancários</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:   #0f1f3d;
+      --navy2:  #162848;
+      --blue:   #1d4ed8;
+      --blue-l: #2563eb;
+      --sky:    #e8f0fe;
+      --white:  #ffffff;
+      --gray50: #f8fafc;
+      --gray100:#f1f5f9;
+      --gray200:#e2e8f0;
+      --gray400:#94a3b8;
+      --gray600:#475569;
+      --gray700:#334155;
+      --gray900:#0f172a;
+      --green:  #16a34a;
+      --red:    #dc2626;
+      --amber:  #d97706;
+      --r: 8px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',sans-serif;color:var(--gray700);background:var(--gray50);font-size:15px;line-height:1.6}
+    a{color:var(--blue-l);text-decoration:none}
+    a:hover{text-decoration:underline}
+    img{max-width:100%}
+
+    /* ── NAV ── */
+    .nav{background:var(--navy);padding:0 40px;display:flex;align-items:center;height:64px;position:sticky;top:0;z-index:200;box-shadow:0 1px 0 rgba(255,255,255,.06)}
+    .nav-brand{font-weight:700;font-size:1.2rem;color:#fff;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+    .nav-brand-dot{width:8px;height:8px;background:var(--blue-l);border-radius:50%}
+    .nav-links{display:flex;align-items:center;gap:4px;margin-left:auto}
+    .nav-link{color:rgba(255,255,255,.7);font-size:.875rem;font-weight:500;padding:8px 14px;border-radius:6px;transition:.15s}
+    .nav-link:hover{color:#fff;background:rgba(255,255,255,.08);text-decoration:none}
+    .nav-link.active{color:#fff}
+    .nav-btn{background:var(--blue-l);color:#fff;font-size:.875rem;font-weight:600;padding:8px 18px;border-radius:6px;transition:.15s}
+    .nav-btn:hover{background:#1d4ed8;text-decoration:none}
+    .nav-user{color:rgba(255,255,255,.7);font-size:.875rem;padding:8px 12px}
+
+    /* ── FLASH ── */
+    .flash-wrap{position:fixed;top:72px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px;max-width:380px}
+    .flash{padding:12px 20px;border-radius:var(--r);font-size:.875rem;font-weight:500;display:flex;align-items:center;gap:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);animation:slideIn .25s ease}
+    @keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+    .flash.success{background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d}
+    .flash.danger{background:#fef2f2;border:1px solid #fecaca;color:#dc2626}
+    .flash.warning{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+    .flash.info{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8}
+
+    /* ── LAYOUT ── */
+    .container{max-width:1100px;margin:0 auto;padding:0 24px}
+    .page{padding:48px 0 80px}
+
+    /* ── CARDS ── */
+    .card{background:#fff;border:1px solid var(--gray200);border-radius:var(--r);padding:28px}
+    .card-title{font-size:1rem;font-weight:600;color:var(--gray900);margin-bottom:20px}
+
+    /* ── BUTTONS ── */
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border-radius:6px;font-size:.875rem;font-weight:600;cursor:pointer;border:none;transition:.15s;text-decoration:none}
+    .btn:hover{text-decoration:none}
+    .btn-primary{background:var(--blue-l);color:#fff}
+    .btn-primary:hover{background:var(--blue)}
+    .btn-outline{background:transparent;color:var(--blue-l);border:1.5px solid var(--blue-l)}
+    .btn-outline:hover{background:var(--sky)}
+    .btn-danger{background:var(--red);color:#fff}
+    .btn-danger:hover{background:#b91c1c}
+    .btn-success{background:var(--green);color:#fff}
+    .btn-success:hover{background:#15803d}
+    .btn-sm{padding:6px 14px;font-size:.8rem}
+    .btn-lg{padding:14px 32px;font-size:1rem}
+    .btn-block{width:100%;justify-content:center}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+
+    /* ── FORM ── */
+    .form-group{margin-bottom:18px}
+    .form-label{display:block;font-size:.8rem;font-weight:600;color:var(--gray700);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+    .form-control{width:100%;padding:10px 14px;border:1.5px solid var(--gray200);border-radius:6px;font-size:.9rem;font-family:'Inter',sans-serif;transition:.15s;outline:none;background:#fff}
+    .form-control:focus{border-color:var(--blue-l);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+    select.form-control{cursor:pointer}
+
+    /* ── BADGES ── */
+    .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+    .badge-blue{background:var(--sky);color:var(--blue)}
+    .badge-green{background:#f0fdf4;color:var(--green)}
+    .badge-amber{background:#fffbeb;color:var(--amber)}
+    .badge-red{background:#fef2f2;color:var(--red)}
+    .badge-gray{background:var(--gray100);color:var(--gray600)}
+
+    /* ── TABLES ── */
+    .table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--gray200)}
+    table{width:100%;border-collapse:collapse}
+    thead tr{background:var(--gray50)}
+    th{padding:11px 16px;text-align:left;font-size:.75rem;font-weight:600;color:var(--gray600);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--gray200)}
+    td{padding:11px 16px;border-bottom:1px solid var(--gray100);font-size:.875rem;color:var(--gray700)}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover td{background:var(--gray50)}
+
+    /* ── MISC ── */
+    .text-muted{color:var(--gray400)}
+    .text-sm{font-size:.8rem}
+    .mt-1{margin-top:8px}.mt-2{margin-top:16px}.mt-3{margin-top:24px}.mt-4{margin-top:32px}
+    .mb-1{margin-bottom:8px}.mb-2{margin-bottom:16px}.mb-3{margin-bottom:24px}
+    .flex{display:flex}.gap-1{gap:8px}.gap-2{gap:16px}.gap-3{gap:24px}
+    .items-center{align-items:center}.justify-between{justify-content:space-between}
+    .flex-wrap{flex-wrap:wrap}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    @media(max-width:768px){
+      .nav{padding:0 16px}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+      .container{padding:0 16px}
+    }
+
+    /* ── POPUP OVERLAY ── */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+    .overlay.show{display:flex}
+    .popup{background:#fff;border-radius:12px;padding:40px;max-width:480px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.2);animation:popIn .25s ease}
+    @keyframes popIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+    .popup-title{font-size:1.3rem;font-weight:700;color:var(--gray900);margin-bottom:8px}
+    .popup-sub{color:var(--gray600);font-size:.9rem;margin-bottom:24px;line-height:1.6}
+
+    /* ── SPINNER ── */
+    .spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* FOOTER */
+    footer{background:var(--navy);color:rgba(255,255,255,.5);text-align:center;padding:28px;font-size:.8rem;margin-top:auto}
+    footer a{color:rgba(255,255,255,.6)}footer a:hover{color:#fff}
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<nav class="nav">
+  <a href="{{ url_for('index') }}" class="nav-brand" style="text-decoration:none">
+    <span class="nav-brand-dot"></span>{{ app_name }}
+  </a>
+  <div class="nav-links">
+    {% if user %}
+      <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint=='dashboard' %}active{% endif %}">Painel</a>
+      <a href="{{ url_for('planos') }}" class="nav-link">Planos</a>
+      <span class="nav-user">{{ user.name }}</span>
+      <a href="{{ url_for('logout') }}" class="nav-link">Sair</a>
+    {% else %}
+      <a href="{{ url_for('planos') }}" class="nav-link">Planos</a>
+      <a href="{{ url_for('login') }}" class="nav-link">Entrar</a>
+      <a href="{{ url_for('register') }}" class="nav-btn">Criar conta</a>
+    {% endif %}
+  </div>
+</nav>
+
+{% if get_flashed_messages() %}
+<div class="flash-wrap" id="flash-wrap">
+  {% for cat, msg in get_flashed_messages(with_categories=True) %}
+    <div class="flash {{ cat }}">{{ msg }}</div>
+  {% endfor %}
+</div>
+<script>setTimeout(()=>{const w=document.getElementById('flash-wrap');if(w)w.style.display='none'},4000)</script>
+{% endif %}
+
+{% block body %}{% endblock %}
+
+<footer>
+  &copy; {{ now.year }} {{ app_name }}. Todos os direitos reservados. &nbsp;|&nbsp;
+  <a href="#">Termos de Uso</a> &nbsp;|&nbsp; <a href="#">Privacidade</a> &nbsp;|&nbsp; <a href="#">Suporte</a>
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

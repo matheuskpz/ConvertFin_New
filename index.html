@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}{{ app_name }} — Conversor de Extratos Bancários{% endblock %}
+
+{% block head %}
+<style>
+  body{background:#fff}
+  .hero{background:var(--navy);color:#fff;padding:80px 0 100px;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
+  .hero-content{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px}
+  .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:6px 16px;font-size:.78rem;font-weight:500;letter-spacing:.04em;margin-bottom:28px;color:rgba(255,255,255,.8)}
+  .hero-tag::before{content:'';width:6px;height:6px;background:#4ade80;border-radius:50%}
+  h1{font-size:clamp(2rem,4.5vw,3.5rem);font-weight:700;line-height:1.1;letter-spacing:-.03em;margin-bottom:20px}
+  h1 span{color:#60a5fa}
+  .hero-sub{font-size:1.1rem;color:rgba(255,255,255,.7);max-width:560px;line-height:1.7;margin-bottom:40px}
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap}
+  .btn-hero{padding:13px 28px;font-size:.95rem;border-radius:7px;font-weight:600;cursor:pointer;border:none;transition:.2s}
+  .btn-hero-primary{background:var(--blue-l);color:#fff}
+  .btn-hero-primary:hover{background:#1d4ed8;text-decoration:none}
+  .btn-hero-ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.3)}
+  .btn-hero-ghost:hover{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.05);text-decoration:none}
+  .hero-stats{display:flex;gap:40px;margin-top:56px;padding-top:40px;border-top:1px solid rgba(255,255,255,.08)}
+  .stat-num{font-size:1.8rem;font-weight:700;color:#fff;letter-spacing:-.03em}
+  .stat-label{font-size:.8rem;color:rgba(255,255,255,.5);margin-top:2px}
+
+  /* BANKS */
+  .banks-strip{background:var(--gray100);border-top:1px solid var(--gray200);border-bottom:1px solid var(--gray200);padding:16px 0;overflow:hidden}
+  .banks-scroll{display:flex;gap:0;animation:scroll 30s linear infinite;width:max-content}
+  .bank-item{padding:6px 24px;font-size:.8rem;font-weight:600;color:var(--gray600);letter-spacing:.02em;white-space:nowrap}
+  @keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+  /* HOW */
+  .section{padding:80px 0}
+  .section-tag{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--blue-l);margin-bottom:12px}
+  .section-title{font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;color:var(--gray900);letter-spacing:-.02em;margin-bottom:12px}
+  .section-sub{font-size:1rem;color:var(--gray600);max-width:560px;line-height:1.7}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:48px}
+  .step{text-align:center}
+  .step-num{width:48px;height:48px;background:var(--sky);color:var(--blue-l);font-size:1.1rem;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+  .step-title{font-size:1rem;font-weight:600;color:var(--gray900);margin-bottom:8px}
+  .step-desc{font-size:.875rem;color:var(--gray600);line-height:1.65}
+
+  /* FEATURES */
+  .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+  .feat-card{background:#fff;border:1px solid var(--gray200);border-radius:var(--r);padding:28px 24px;transition:.2s}
+  .feat-card:hover{border-color:var(--gray400);box-shadow:0 4px 20px rgba(0,0,0,.07)}
+  .feat-icon{width:40px;height:40px;background:var(--sky);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+  .feat-icon svg{width:20px;height:20px;stroke:var(--blue-l);fill:none;stroke-width:2}
+  .feat-title{font-size:.95rem;font-weight:600;color:var(--gray900);margin-bottom:8px}
+  .feat-desc{font-size:.85rem;color:var(--gray600);line-height:1.6}
+
+  /* CTA */
+  .cta{background:var(--navy);color:#fff;padding:80px 0;text-align:center}
+  .cta h2{font-size:2rem;font-weight:700;letter-spacing:-.02em;margin-bottom:16px}
+  .cta p{color:rgba(255,255,255,.7);font-size:1rem;margin-bottom:32px}
+
+  @media(max-width:768px){
+    .steps,.features-grid{grid-template-columns:1fr}
+    .hero-stats{flex-wrap:wrap;gap:24px}
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-tag">Conversor profissional de extratos bancários</div>
+    <h1>Transforme extratos PDF<br/>em <span>dados estruturados</span><br/>em segundos</h1>
+    <p class="hero-sub">Compatível com os principais bancos brasileiros. Exporte para OFX, Excel ou CSV. Integre direto ao seu software contábil.</p>
+    <div class="hero-actions">
+      <a href="{{ url_for('register') }}" class="btn-hero btn-hero-primary">Começar gratuitamente</a>
+      <a href="{{ url_for('planos') }}" class="btn-hero btn-hero-ghost">Ver planos e preços</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">44+</div>
+        <div class="stat-label">Bancos suportados</div>
+      </div>
+      <div>
+        <div class="stat-num">OFX / Excel / CSV</div>
+        <div class="stat-label">Formatos de exportação</div>
+      </div>
+      <div>
+        <div class="stat-num">&lt; 10s</div>
+        <div class="stat-label">Tempo médio de conversão</div>
+      </div>
+      <div>
+        <div class="stat-num">LGPD</div>
+        <div class="stat-label">Conformidade e segurança</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BANKS STRIP -->
+<div class="banks-strip">
+  <div class="banks-scroll">
+    {% for b in ["Nubank","Itaú","Bradesco","Santander","Banco Inter","Caixa","Banco do Brasil","BTG Pactual","C6 Bank","Sicoob","Sicredi","PicPay","PagBank","Stone","Mercado Pago","Banrisul","Daycoval","Safra","Nubank","Itaú","Bradesco","Santander","Banco Inter","Caixa","Banco do Brasil","BTG Pactual","C6 Bank","Sicoob","Sicredi","PicPay","PagBank","Stone","Mercado Pago","Banrisul","Daycoval","Safra"] %}
+    <span class="bank-item">{{ b }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section" style="background:#fff">
+  <div class="container">
+    <div class="section-tag">Como funciona</div>
+    <div class="section-title">Três passos. Resultado imediato.</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Faça o upload do PDF</div>
+        <div class="step-desc">Selecione o extrato bancário no formato PDF. Suportamos arquivos de até 15 MB.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Escolha o formato de saída</div>
+        <div class="step-desc">OFX para importar no software contábil, Excel para análise ou CSV para integrações.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Baixe o arquivo convertido</div>
+        <div class="step-desc">O arquivo é gerado instantaneamente, com todas as transações organizadas e o total calculado.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" style="background:var(--gray50)">
+  <div class="container">
+    <div class="section-tag">Recursos</div>
+    <div class="section-title">Tudo que você precisa, sem o que não precisa.</div>
+    <p class="section-sub">Desenvolvido para contadores, analistas financeiros e pequenos empresários que precisam de agilidade.</p>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></div>
+        <div class="feat-title">Multi-formato de saída</div>
+        <div class="feat-desc">Exporte para OFX (compatível com sistemas contábeis), Excel (.xlsx) ou CSV. Você escolhe.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+        <div class="feat-title">Detecção automática de banco</div>
+        <div class="feat-desc">O sistema identifica automaticamente o banco emissor e aplica o parser correto para cada formato.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="feat-title">Segurança e privacidade</div>
+        <div class="feat-desc">Seus arquivos são processados com criptografia SSL e descartados imediatamente após a conversão. Conformidade com LGPD.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="feat-title">Processamento rápido</div>
+        <div class="feat-desc">Conversões concluídas em menos de 10 segundos, independente do tamanho do arquivo.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+        <div class="feat-title">Histórico de conversões</div>
+        <div class="feat-desc">Acesse o registro de todas as conversões realizadas na sua conta, com data, banco e formato.</div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <div class="feat-title">Suporte especializado</div>
+        <div class="feat-desc">Equipe de suporte dedicada para ajudar com bancos específicos, erros de conversão ou dúvidas de uso.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="container">
+    <h2>Comece agora sem pagar nada</h2>
+    <p>5 conversões gratuitas por mês. Sem cartão de crédito. Sem burocracia.</p>
+    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Criar conta gratuita</a>
+  </div>
+</section>
+{% endblock %}

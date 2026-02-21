@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Planos e Preços{% endblock %}
+{% block head %}
+<style>
+  .plans-hero{background:var(--navy);padding:56px 0 80px;text-align:center;color:#fff}
+  .plans-hero h1{font-size:2.2rem;font-weight:700;letter-spacing:-.03em;margin-bottom:12px}
+  .plans-hero p{color:rgba(255,255,255,.7);font-size:1rem}
+  .plans-wrap{max-width:680px;margin:-40px auto 0;padding:0 24px 80px;position:relative;z-index:1}
+  .plans-g{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .plan-card{background:#fff;border:1px solid var(--gray200);border-radius:12px;padding:32px 28px;position:relative}
+  .plan-card.featured{border:2px solid var(--blue-l);box-shadow:0 8px 40px rgba(37,99,235,.15)}
+  .plan-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--blue-l);color:#fff;font-size:.7rem;font-weight:700;padding:4px 16px;border-radius:999px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+  .plan-name{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gray400);margin-bottom:12px}
+  .plan-name.pro{color:var(--blue-l)}
+  .plan-price{font-size:2.4rem;font-weight:800;color:var(--gray900);letter-spacing:-.04em;line-height:1}
+  .plan-price span{font-size:.9rem;font-weight:400;color:var(--gray400)}
+  .plan-desc{font-size:.85rem;color:var(--gray600);margin:12px 0 24px;line-height:1.6}
+  .plan-divider{border:none;border-top:1px solid var(--gray100);margin:0 0 20px}
+  .plan-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+  .plan-features li{font-size:.85rem;color:var(--gray700);display:flex;align-items:flex-start;gap:10px}
+  .plan-features li.yes::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0}
+  .plan-features li.no::before{content:'–';color:var(--gray300);flex-shrink:0}
+  .compare-section{padding:60px 24px 80px;background:var(--gray50)}
+  .compare-title{text-align:center;font-size:1.4rem;font-weight:700;color:var(--gray900);margin-bottom:40px}
+  .compare-wrap{max-width:640px;margin:0 auto;border:1px solid var(--gray200);border-radius:12px;overflow:hidden;background:#fff}
+  .compare-table{width:100%;border-collapse:collapse}
+  .compare-table th{padding:16px 20px;text-align:center;font-size:.82rem;font-weight:700;background:var(--gray50);border-bottom:1px solid var(--gray200)}
+  .compare-table th:first-child{text-align:left}
+  .compare-table td{padding:13px 20px;text-align:center;border-bottom:1px solid var(--gray100);font-size:.875rem}
+  .compare-table td:first-child{text-align:left;font-weight:500;color:var(--gray700)}
+  .compare-table tr:last-child td{border-bottom:none}
+  .check{color:var(--green);font-weight:700}
+  .cross{color:var(--gray300)}
+  .faq-section{padding:60px 24px 80px}
+  .faq-wrap{max-width:640px;margin:0 auto}
+  .faq-title{text-align:center;font-size:1.4rem;font-weight:700;color:var(--gray900);margin-bottom:40px}
+  .faq-item{border-bottom:1px solid var(--gray200);padding:20px 0}
+  .faq-q{font-weight:600;color:var(--gray900);margin-bottom:8px}
+  .faq-a{font-size:.875rem;color:var(--gray600);line-height:1.7}
+  @media(max-width:600px){.plans-g{grid-template-columns:1fr}.plans-wrap{margin-top:20px}}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="plans-hero">
+  <div class="container">
+    <h1>Planos e Preços</h1>
+    <p>Simples, transparente, sem surpresas. Cancele quando quiser.</p>
+  </div>
+</div>
+
+<div class="plans-wrap">
+  <div class="plans-g">
+    <div class="plan-card">
+      <div class="plan-name">Gratuito</div>
+      <div class="plan-price">R$ 0<span>/mês</span></div>
+      <div class="plan-desc">Para quem quer testar a plataforma sem compromisso.</div>
+      <hr class="plan-divider"/>
+      <ul class="plan-features">
+        <li class="yes">5 conversões por mês</li>
+        <li class="yes">OFX, Excel e CSV</li>
+        <li class="yes">Histórico de conversões</li>
+        <li class="no">Suporte prioritário</li>
+        <li class="no">Categorização por IA</li>
+      </ul>
+      {% if user and user.plan == 'free' %}
+      <a href="{{ url_for('dashboard') }}" class="btn btn-outline btn-block">Plano atual</a>
+      {% elif not user %}
+      <a href="{{ url_for('register') }}" class="btn btn-outline btn-block">Criar conta grátis</a>
+      {% endif %}
+    </div>
+
+    <div class="plan-card featured">
+      <div class="plan-badge">Recomendado</div>
+      <div class="plan-name pro">Pro</div>
+      <div class="plan-price" style="color:var(--blue)">R$ {{ pro_price }}<span>/mês</span></div>
+      <div class="plan-desc">Para contadores e analistas que precisam de conversões ilimitadas.</div>
+      <hr class="plan-divider"/>
+      <ul class="plan-features">
+        <li class="yes"><strong>Conversões ilimitadas</strong></li>
+        <li class="yes">OFX, Excel e CSV</li>
+        <li class="yes">Histórico completo</li>
+        <li class="yes">Suporte prioritário via WhatsApp</li>
+        <li class="yes">Novos bancos em primeira mão</li>
+        <li class="yes">Categorização por IA (em breve)</li>
+      </ul>
+      {% if user and user.plan == 'pro' %}
+      <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-block">Plano ativo</a>
+      {% else %}
+      <a href="{{ url_for('assinar') }}" class="btn btn-primary btn-block">Assinar Pro</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="compare-section">
+  <div class="compare-title">Comparação de planos</div>
+  <div class="compare-wrap">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th style="width:55%">Recurso</th>
+          <th>Gratuito</th>
+          <th style="color:var(--blue-l)">Pro</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Conversões mensais</td><td>5</td><td><strong>Ilimitadas</strong></td></tr>
+        <tr><td>Exportação OFX</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Exportação Excel (.xlsx)</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Exportação CSV</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Histórico de conversões</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Todos os bancos</td><td class="check">✓</td><td class="check">✓</td></tr>
+        <tr><td>Suporte prioritário</td><td class="cross">–</td><td class="check">✓</td></tr>
+        <tr><td>Novos bancos em primeira mão</td><td class="cross">–</td><td class="check">✓</td></tr>
+        <tr><td>Categorização por IA</td><td class="cross">–</td><td>Em breve</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="faq-section">
+  <div class="faq-wrap">
+    <div class="faq-title">Perguntas frequentes</div>
+    <div class="faq-item"><div class="faq-q">Preciso de cartão de crédito para criar a conta?</div><div class="faq-a">Não. A conta gratuita não exige nenhum dado de pagamento. Você informa dados de pagamento apenas ao assinar o plano Pro.</div></div>
+    <div class="faq-item"><div class="faq-q">Meus arquivos ficam armazenados no servidor?</div><div class="faq-a">Não. Os PDFs são processados em memória e descartados imediatamente. Armazenamos apenas o registro da conversão (nome, banco e data).</div></div>
+    <div class="faq-item"><div class="faq-q">Posso cancelar o plano Pro quando quiser?</div><div class="faq-a">Sim, sem fidelidade. Cancele a qualquer momento pelo painel do Stripe ou pelo suporte.</div></div>
+    <div class="faq-item"><div class="faq-q">E se meu banco não for suportado?</div><div class="faq-a">Entre em contato com o suporte. Adicionamos novos bancos em menos de 48h para usuários Pro.</div></div>
+    <div class="faq-item"><div class="faq-q">O PDF precisa ser pesquisável?</div><div class="faq-a">Sim. Precisa ser um PDF com texto selecionável, não escaneado como imagem. A maioria dos extratos baixados diretamente do app ou internet banking já é pesquisável.</div></div>
+  </div>
+</div>
+{% endblock %}
